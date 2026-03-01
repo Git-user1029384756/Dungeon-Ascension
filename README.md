@@ -9,23 +9,49 @@
 ### v1 - Foundation
 Established the primary gameplay loop, combat system, floor progression, persistence, and modular structure.
 
-- Core combat
-- Floors
-- XP system
+- Core automated combat
+- Floor progression system
+- XP and leveling system
+- Persistent character saves
+- Boss encounters
+- Risk–reward floor regression on defeat
 
-### v1.5
---(future/planned)
+v1 proved the core loop was stable and replayable.
+
+### v1.5 - Structural Refactor
+Reorganized the architecture around a centralized GameEngine class.
+Encapsulated state ownership, lifecycle management, and exploration flow.
+Fixed Defense being used twice during damage calculation.
+Added version tag in save file.
+
+- Introduced GameEngine (centralized orchestration)
+- Renamed project.py → game.py
+- Encapsulated lifecycle management
+- Separated exploration logic
+- Save file version tagging
+- Removed testing scaffolding
+- Improved state ownership boundaries
+- Backward-compatible save loading
+- Fixed damage calculation
+
+No gameplay changes — structural evolution only.
+
+### v2 - System Expansion
+
+- (future/planned)
+
+## Overview
 
 **Dungeon Ascension** is a modular command-line RPG implemented in Python.
-The game simulates structured dungeon progression in which a player explores floors, encounters enemies, gains experience, levels up, and ultimately faces one of two randomized boss encounters.
+The game simulates a structured dungeon progression system in which a player explores floors, encounters enemies, gains experience, levels up, and ultimately faces randomized boss encounters.
 
-The project emphasizes clean architecture, separation of concerns, testability, and data-driven design while maintaining immersive terminal presentation through ASCII art and color-enhanced output.
+The project is evolving toward stricter separation of engine logic and presentation and data-driven design.
 
 This application was developed as the final project for CS50P (Introduction to Programming with Python).
 
 ---
 
-## Concept
+## Concept/Lore
 
 Beneath the surface of a forgotten kingdom lies a descending dungeon known only as The Deep Vault. No maps survive. No records explain its origin. What is known is simple: those who descend grow stronger — or never return.
 
@@ -37,119 +63,77 @@ In Dungeon Ascension, the player is one such adventurer — climbing through dan
 
 ---
 
-## Technical Architecture
+## Core Gameplay Loop
+
+The player:
+
+1. Creates or loads a persistent character.
+2. Explores dungeon floors through randomized events.
+3. Engages in automated combat encounters.
+4. Gains experience and levels up.
+5. Progresses deeper into the dungeon after meeting victory thresholds.
+6. Faces one of two randomized bosses on the final floor.
+7. Resets progression after clearing the dungeon, with the player stats still being intact.
+
+If defeated, the player is revived on the previous floor, creating a structured risk–reward loop.
+
+---
+
+## Technical Design
+
+The project is organized into modular components:
 
 ```
-project.py          # Entry point, gameplay loop coordination
-combat.py           # Turn-based battle resolution
-player.py           # Player class, XP and leveling system
-enemy.py            # Enemy class (including bosses)
-character.py        # Shared base class for Player and Enemy
-config.py           # Game constants and balance configuration
-art.py              # ASCII art and presentation mappings
-save_load.py        # Persistent character storage (JSON-based)
-test_project.py     # Pytest unit tests
-data/               # JSON save data
+game.py             # Orchestrator through the GameEngine class.
+art.py              # Art for bosses, art for death screen and intro banner.
+combat.py           # Handles turn-based battle resolution logic.
+player.py           # Implements the Player class, XP system, and leveling mechanics.
+enemy.py            # Defines the Enemy class and boss variants.
+config.py           # Centralizes game constants and balancing parameters.
+save_load.py        # Manages persistent storage and retrieval of character data.
+character.py        # Provides shared logic used by both Player and Enemy classes.
+data/               # Saved character data inside JSON
 requirements.txt    # Project dependencies
 ```
 
-## Architectural Principles
+### Architectural Principles
 
-### Separation of Concerns
+* **Separation of Concerns**
+  Combat logic, player state management, configuration, and persistence are separated into independent modules.
 
-Game mechanics, persistence, configuration, and presentation are separated into dedicated modules.
+* **Data-Driven Design**
+  Enemy stats, floor configurations, and progression thresholds are defined in `config.py`, allowing balance adjustments without altering logic.
 
-### Data-Driven Design
-
-Enemy stats, floor distribution, victory requirements, and scaling values are centralized in `config.py`, enabling balance adjustments without modifying combat logic.
-
-### Presentation Decoupling
-
-ASCII art and visual effects are stored and mapped in `art.py`, preventing UI logic from polluting core gameplay systems.
+* **Persistence Layer**
+  Character progress is saved and loaded using a structured dictionary-based storage system.
 
 ---
 
-## Core Gameplay Loop
-
-1. Create or load a persistent character.
-2. Explore the current dungeon floor.
-3. Trigger randomized events:
-
-   * Combat encounter
-   * Potion discovery
-   * Empty chamber
-4. Engage in automated turn-based combat.
-5. Gain XP and level up.
-6. Descend after reaching required victories.
-7. Face one of two randomized bosses on the final floor.
-8. Upon clearing the dungeon, progression resets while character stats persist.
-
-If defeated:
-
-* The player is revived.
-* Progress regresses by one floor.
-* HP is restored.
-* Victories reset.
-
----
-
-## Presentation Layer
-
-The project includes a dedicated presentation module (`art.py`) responsible for ASCII art and visual enhancements.
-
-### Visual Features
-
-* Green intro banner
-* Blue-colored boss art
-* Red Grim Reaper death art
-* Dynamic boss reveal sequences
-* Terminal clearing for cinematic transitions
-* Color-enhanced combat messaging using `colorama`
-
-Presentation logic is separated from gameplay logic, maintaining architectural clarity while enhancing immersion.
-
----
-
-## Required CS50P Functions
-
-The following functions are defined in `project.py` and tested using pytest:
-
-* `create_enemy_for_floor(floor)`
-* `should_descend_floor(victories_on_floor, current_floor)`
-* `calculate_new_floor_on_defeat(current_floor)`
-
-These functions isolate deterministic game logic from side effects, ensuring proper unit test coverage.
-
----
 
 ## Combat System
 
-Combat is fully automated and turn-based.
+Combat is automated and turn-based.
+Damage calculation incorporates attack and defense attributes.
+Enemy archetypes are designed to create distinct combat pacing:
 
-Damage is calculated using attack and defense attributes, with a minimum damage threshold ensuring progression.
+* Baseline enemies (e.g., Goblin)
+* Scaling mid-tier enemies (e.g., Orc, Skeleton)
+* Heavy units (e.g., Strong Orc)
+* Two distinct boss archetypes with different stat distributions
 
-Enemy categories include:
-
-* Baseline units (Goblin)
-* Mid-tier units (Orc, Skeleton)
-* Heavy units (Strong Orc)
-* Two distinct boss archetypes with unique stat distributions
-
-Boss encounters trigger unique messaging and visual presentation, representing the peak difficulty of a dungeon cycle.
+Boss encounters include unique messaging and represent the peak difficulty of a dungeon cycle.
 
 ---
 
 ## Features
 
-* Persistent character saves (JSON-based)
-* XP progression and level scaling
-* Floor-based structured advancement
-* Randomized encounters
-* Randomized final boss selection
-* Color-enhanced terminal output
-* ASCII art boss and death sequences
-* Modular architecture
-* Pytest-based unit testing
+* Persistent character saves
+* XP and level progression system
+* Floor-based dungeon advancement
+* Randomized encounters and boss selection
+* Structured difficulty escalation
+* Color-enhanced CLI output (via colorama)
+* Modular code architecture
 
 ---
 
@@ -163,19 +147,13 @@ pip install -r requirements.txt
 
 ## Running the Game
 
-python project.py
-
----
-
-## Running Tests
-
-pytest test_project.py
+python game.py
 
 ---
 
 ## Dependencies
 
-* `colorama`
+* colorama
 
 (Defined in `requirements.txt`)
 
@@ -183,8 +161,8 @@ pytest test_project.py
 
 ## Conclusion
 
-Dungeon Ascension demonstrates structured program design, modular architecture, deterministic testing practices, and applied object-oriented principles within an interactive terminal application.
+Dungeon Ascension demonstrates structured program design, modular architecture, and applied object-oriented principles within a game-driven context.
 
-The project balances gameplay structure with maintainable engineering practices while incorporating immersive presentation elements uncommon in typical CLI-based coursework.
+The project balances gameplay structure with maintainable software engineering practices.
 
 ---

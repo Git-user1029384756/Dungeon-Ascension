@@ -1,13 +1,13 @@
 import time
 from colorama import Fore, Style
 
-delay : float = .8
+delay : float = .7
 
 def battle(player, enemy):
     if enemy.is_boss:
         print(Style.BRIGHT + Fore.MAGENTA + f'\nA terrifying presence fills the dungeon...')
         print(Style.BRIGHT + Fore.MAGENTA + f'{enemy.name} emerges from the shadows!\n')
-        time.sleep(delay * 7)
+        time.sleep(delay * 2)
     else:
         article = 'an' if enemy.name[0].lower() in 'aeiou' else 'a'
         print(f'\n{player.name} encounters {article} {enemy.name}!\n')
@@ -26,7 +26,7 @@ def battle(player, enemy):
             else:
                 print(Fore.GREEN + f'{enemy.name} has been slain!\n')
             return 'win'
-
+        
         damage_to_player = max(enemy.attack - player.defense, 1)
         player.take_damage(enemy.attack)
 

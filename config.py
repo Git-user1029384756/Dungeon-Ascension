@@ -32,7 +32,7 @@ ENEMY_STATS = {
     },
     'skeleton' : {
         'max_hp' : 60,
-        'attack' : 30,
+        'attack' : 25,
         'defense' : 15,
         'xp_reward' : 25
     },
@@ -54,7 +54,7 @@ ENEMY_STATS = {
         'display_name' : 'Kaelthar the Worldbreaker',
         'max_hp' : 500,
         'attack' : 100,
-        'defense' : 20,
+        'defense' : 25,
         'xp_reward' : 250,
         'is_boss' : True
     }

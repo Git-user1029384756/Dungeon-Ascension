@@ -7,10 +7,7 @@ class Character:
         self.defense = defense
     
     def take_damage(self, amount : int):
-        damage = amount - self.defense
-        if damage < 1:
-            damage = 1
-        self.current_hp -= damage
+        self.current_hp -= amount
         if self.current_hp < 0:
             self.current_hp = 0
     

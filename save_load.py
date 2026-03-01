@@ -9,8 +9,15 @@ def load_characters():
     except (json.JSONDecodeError, FileNotFoundError):
         return {}
     
-    return data
+    save_version = data.get('save_version', '1.0')
+    characters = data['characters'] if 'characters' in data else data
+    
+    return characters
 
-def save_characters(data):
+def save_characters(character):
+    data = {
+        'save_version' : '1.5',
+        'characters' : character
+    }
     with open(FILE_PATH, 'w') as file:
         json.dump(data, file, indent= 2)

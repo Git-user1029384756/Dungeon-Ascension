@@ -1,16 +1,19 @@
 {
-  "Developer": {
-    "class_type": "mage",
-    "level": 64,
-    "xp": 5,
-    "max_hp": 690,
-    "current_hp": 690,
-    "attack": 214,
-    "defense": 128,
-    "inventory": {
-      "Potion": 49
-    },
-    "current_floor": 1,
-    "victories_on_floor": 0
+  "save_version": "1.5",
+  "characters": {
+    "Developer": {
+      "class_type": "mage",
+      "level": 64,
+      "xp": 5,
+      "max_hp": 690,
+      "current_hp": 690,
+      "attack": 214,
+      "defense": 128,
+      "inventory": {
+        "Potion": 49
+      },
+      "current_floor": 1,
+      "victories_on_floor": 0
+    }
   }
 }

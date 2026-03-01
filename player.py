@@ -48,7 +48,7 @@ class Player(Character):
             self.level += 1
             self.max_hp += 10
             self.attack += 3
-            self.defense += 2
+            self.defense += 1
             self.current_hp = self.max_hp
             print(Style.BRIGHT + Fore.YELLOW + 'Level Up!')
 

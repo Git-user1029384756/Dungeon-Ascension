@@ -38,7 +38,7 @@ def death_art():
 :$$$$$$$$$;    T$$$$$$$p._.g$$$$$$P         ;
 $$$P^^T$$$$p.   `T$$$$$$$$$$$$$$P'     _/`. :
        `T$$$$$b.  `T$$$$$$$$$$P'    .g$P   \;
-- Death  `T$$$$$b.  "^T$$$$P^"     d$P'
+ Death  `T$$$$$b.  "^T$$$$P^"     d$P'
            `T$$$$$b.             .dP'
              "^T$$$$b.        .g$P'
                 "^T$$$b    .g$P^"
@@ -86,7 +86,7 @@ def kaelthar_the_worldbreaker_art():
       J##$ J % %%$F
        %$# * * %#&
        %#$ | |%#$%
-       *#$%| | #$*             - Kaelthar the Worldbreaker
+       *#$%| | #$*             -Kaelthar the Worldbreaker
       /$#' ) ( `%%\
      /#$# /   \ %$%\
     ooooO'     `Ooooo
@@ -143,7 +143,7 @@ def malakar_warden_of_the_abyss_art():
   / | || / /
  /  | ||/ /
 (_ | ,'/ /
-( `/ ||\/             - Malakar, Warden of the Abyss
+( `/ ||\/             -Malakar, Warden of the Abyss
  \/ | \_
  |  \_  `_
   \ ,-,\,-,`,
