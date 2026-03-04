@@ -1,139 +1,277 @@
 
----
-
 # Dungeon Ascension
-#### Description:
+
+A Modular Command-Line RPG Engine in Python
+
+---
 
 ## Version History
 
-### v1 - Foundation
+---
+
+### v1 — Foundation
+
 Established the primary gameplay loop, combat system, floor progression, persistence, and modular structure.
 
-- Core automated combat
-- Floor progression system
-- XP and leveling system
-- Persistent character saves
-- Boss encounters
-- Risk–reward floor regression on defeat
+* Core automated combat
+* Floor progression system
+* XP and leveling system
+* Persistent character saves
+* Boss encounters
+* Risk–reward floor regression on defeat
 
 v1 proved the core loop was stable and replayable.
 
-### v1.5 - Structural Refactor
-Reorganized the architecture around a centralized GameEngine class.
-Encapsulated state ownership, lifecycle management, and exploration flow.
-Fixed Defense being used twice during damage calculation.
-Added version tag in save file.
+---
 
-- Introduced GameEngine (centralized orchestration)
-- Renamed project.py → game.py
-- Encapsulated lifecycle management
-- Separated exploration logic
-- Save file version tagging
-- Removed testing scaffolding
-- Improved state ownership boundaries
-- Backward-compatible save loading
-- Fixed damage calculation
+### v1.5 — Structural Refactor
+
+Focused purely on architectural clarity and long-term scalability.
+
+* Introduced `GameEngine` (centralized orchestration)
+* Renamed `project.py` → `game.py`
+* Encapsulated lifecycle management
+* Separated exploration logic
+* Save file version tagging
+* Backward-compatible save loading
+* Removed testing scaffolding
+* Improved state ownership boundaries
 
 No gameplay changes — structural evolution only.
 
-### v2 - System Expansion
+---
+
+### v2 — Equipment & Loot Expansion (Current)
+
+v2 expands the dungeon prototype into a systemic RPG foundation.
+
+This version introduces a full item ecosystem and loot architecture while preserving modular boundaries.
+
+#### Implemented in v2
+
+### Item System
+
+* `Item` base class
+* `Equipment` subclass
+* `Consumable` subclass
+* Polymorphic `use()` behavior
+* Type-aware reconstruction via `item_from_dict()`
+* Explicit `type` field in serialization
+* Save/load compatibility per item type
+
+Items now serialize and deserialize cleanly with type-aware reconstruction.
+
+---
+
+### Inventory System
+
+* Inventory is a container of item objects (not a dict of counters)
+* Consumables stack by `template_id`
+* Equipment remains unique object instances
+* Stacking logic handled inside `Inventory`
+* Inventory handles storage only; items handle behavior
+
+This structure supports future:
+
+* Enchantments
+* Durability
+* Unique modifiers
+* Metadata per item
+
+---
+
+### Consumable Mechanics
+
+* Supports multiple effect types (`heal_flat`, `heal_percent`)
+* Quantity-based stacking
+* Prevents overheal
+* Blocks usage at full HP
+* Reduces quantity upon use
+* Clean separation between effect logic and storage logic
+
+---
+
+### Equipment System
+
+* Slot-based equipment system (`weapon`, `armor`)
+* Equip/unequip mechanics
+* Automatic swapping
+* Equipment removed from inventory when equipped
+* Equipment returned to inventory when unequipped
+* Save/load persistence of equipped items
+
+Equipment does not permanently mutate player stats.
+
+---
+
+### Dynamic Stat Recalculation
+
+Player stats are computed dynamically from:
+
+* Base stats
+* Equipped item modifiers
+
+Stats are exposed through properties (`max_hp`, `attack`, `defense`).
+
+This prevents:
+
+* Permanent stat drift
+* Stacking bugs
+* Unequip inconsistencies
+* Save corruption issues
+
+Combat reads computed stats directly from the player.
+
+---
+
+### Rarity System
+
+* Equipment includes a `rarity` attribute
+* Rarity-based modifier scaling
+* Rarity-based name coloring
+* Config-driven rarity configuration
+
+Rarity is implemented structurally and visually, without overcomplicating loot weighting.
+
+---
+
+### Loot System
+
+* Centralized `generate_loot()` function
+* Category-based template pools (`consumables`, `equipment`)
+* Data-driven templates (`item_templates.py`)
+* Random category selection
+* Random template selection within category
+* All item creation routed through factory system
+
+Loot generation is unified across future systems (combat, exploration, events).
+
+---
+
+## Current Architectural Philosophy
+
+### Core Principles
+
+#### 1. Separation of Responsibilities
+
+* **Item** → Defines behavior
+* **Inventory** → Stores and stacks
+* **Player** → Orchestrates actions
+* **Combat** → Owns damage calculation
+* **GameEngine** → Controls high-level flow
+
+No system mutates another system's internal structure directly.
+
+---
+
+#### 2. Data-Driven Templates
+
+Items are defined via structured template pools.
+
+This enables:
+
+* Rapid content expansion
+* Safe balancing
+* Version-safe serialization
+* Clear separation between logic and data
+
+---
+
+#### 3. Dynamic Stat Architecture
+
+Stats are derived, not mutated.
+
+This allows future expansion into:
+
+* Advanced modifiers
+* Status effects
+* Buff/debuff systems
+* Conditional effects
+
+Without refactoring the stat core.
+
+---
+
+#### 4. Object-Based Inventory
+
+Inventory intentionally stores objects instead of key-value counters.
+
+This preserves future flexibility for:
+
+* Unique enchantments
+* Randomized modifiers
+* Individual item state
+* Metadata expansion
+
+---
+
+## Core Gameplay Loop (Current State)
+
+1. Create or load a character.
+2. Explore dungeon floors via randomized events.
+3. Engage in automated combat.
+4. Generate loot via centralized loot system.
+5. Equip or store items.
+6. Use consumables strategically.
+7. Gain XP and level up.
+8. Progress floors and face bosses.
+9. Reset dungeon progression after completion.
+
+---
+
+## Planned v2.5 Refinements
 
 - (future/planned)
 
-## Overview
-
-**Dungeon Ascension** is a modular command-line RPG implemented in Python.
-The game simulates a structured dungeon progression system in which a player explores floors, encounters enemies, gains experience, levels up, and ultimately faces randomized boss encounters.
-
-The project is evolving toward stricter separation of engine logic and presentation and data-driven design.
-
-This application was developed as the final project for CS50P (Introduction to Programming with Python).
-
+No new gameplay systems will be introduced in v2.5.
 ---
 
-## Concept/Lore
-
-Beneath the surface of a forgotten kingdom lies a descending dungeon known only as The Deep Vault. No maps survive. No records explain its origin. What is known is simple: those who descend grow stronger — or never return.
-
-Each floor of the dungeon feels constructed rather than natural, populated by creatures that appear placed, not born. Goblins guard upper corridors. Heavier brutes roam the deeper chambers. And at the lowest level, a powerful entity waits — one of two ancient wardens whose presence suggests the dungeon was built to imprison something… or to protect something.
-
-Adventurers enter seeking power, answers, or survival. Few reach the final floor. Fewer still return to tell what they saw.
-
-In Dungeon Ascension, the player is one such adventurer — climbing through danger, forced backward by defeat, and gradually uncovering strength through repetition and persistence.
-
----
-
-## Core Gameplay Loop
-
-The player:
-
-1. Creates or loads a persistent character.
-2. Explores dungeon floors through randomized events.
-3. Engages in automated combat encounters.
-4. Gains experience and levels up.
-5. Progresses deeper into the dungeon after meeting victory thresholds.
-6. Faces one of two randomized bosses on the final floor.
-7. Resets progression after clearing the dungeon, with the player stats still being intact.
-
-If defeated, the player is revived on the previous floor, creating a structured risk–reward loop.
-
----
-
-## Technical Design
-
-The project is organized into modular components:
+## Technical Structure
 
 ```
-game.py             # Orchestrator through the GameEngine class.
-art.py              # Art for bosses, art for death screen and intro banner.
-combat.py           # Handles turn-based battle resolution logic.
-player.py           # Implements the Player class, XP system, and leveling mechanics.
-enemy.py            # Defines the Enemy class and boss variants.
-config.py           # Centralizes game constants and balancing parameters.
-save_load.py        # Manages persistent storage and retrieval of character data.
-character.py        # Provides shared logic used by both Player and Enemy classes.
-data/               # Saved character data inside JSON
-requirements.txt    # Project dependencies
+game.py              # GameEngine orchestrator
+art.py               # ASCII art and presentation mappings
+player.py            # Player class and XP system
+inventory.py         # Inventory container logic
+item.py              # Item, Equipment, Consumable classes
+item_templates.py    # Data-driven item definitions
+loot.py              # Centralized loot generator
+combat.py            # Turn-based combat logic
+enemy.py             # Enemy and boss definitions
+config.py            # Balance parameters
+save_load.py         # Persistence layer
+character.py         # Shared base for Player and Enemy
+data/                # JSON save files
+requirements.txt     # Dependencies
 ```
 
-### Architectural Principles
-
-* **Separation of Concerns**
-  Combat logic, player state management, configuration, and persistence are separated into independent modules.
-
-* **Data-Driven Design**
-  Enemy stats, floor configurations, and progression thresholds are defined in `config.py`, allowing balance adjustments without altering logic.
-
-* **Persistence Layer**
-  Character progress is saved and loaded using a structured dictionary-based storage system.
-
 ---
-
 
 ## Combat System
 
-Combat is automated and turn-based.
-Damage calculation incorporates attack and defense attributes.
-Enemy archetypes are designed to create distinct combat pacing:
+* Automated turn-based combat
+* Combat owns damage calculation
+* Dynamic stat resolution
+* XP rewards
+* Boss archetypes
+* Floor-based difficulty scaling
 
-* Baseline enemies (e.g., Goblin)
-* Scaling mid-tier enemies (e.g., Orc, Skeleton)
-* Heavy units (e.g., Strong Orc)
-* Two distinct boss archetypes with different stat distributions
-
-Boss encounters include unique messaging and represent the peak difficulty of a dungeon cycle.
+Combat remains deterministic but extensible.
 
 ---
 
-## Features
+## Design Goals
 
-* Persistent character saves
-* XP and level progression system
-* Floor-based dungeon advancement
-* Randomized encounters and boss selection
-* Structured difficulty escalation
-* Color-enhanced CLI output (via colorama)
-* Modular code architecture
+Dungeon Ascension is evolving toward:
+
+* Clean architectural boundaries
+* Extensible systems
+* Data-driven expansion
+* Maintainable code structure
+* Version-aware persistence
+* Scalable RPG mechanics
+
+The project is transitioning from game prototype to RPG engine foundation.
 
 ---
 
@@ -141,13 +279,16 @@ Boss encounters include unique messaging and represent the peak difficulty of a 
 
 Install dependencies:
 
-pip install -r requirements.txt
+
+`pip install -r requirements.txt`
 
 ---
 
 ## Running the Game
 
-python game.py
+`python game.py`
+
+if game does not run, try deleting the old data (`characters.json`).
 
 ---
 
@@ -159,10 +300,23 @@ python game.py
 
 ---
 
-## Conclusion
+## Project Origin
 
-Dungeon Ascension demonstrates structured program design, modular architecture, and applied object-oriented principles within a game-driven context.
+Originally developed as the final project for CS50P.
 
-The project balances gameplay structure with maintainable software engineering practices.
+The project has evolved into a structured system-driven RPG architecture.
 
 ---
+
+## Closing Note
+
+Dungeon Ascension now represents:
+
+* Progressive refactoring
+* Iterative system design
+* Applied object-oriented architecture
+* Long-term scalability thinking
+
+Each version strengthens structural foundations before expanding mechanics.
+
+The dungeon grows deeper...

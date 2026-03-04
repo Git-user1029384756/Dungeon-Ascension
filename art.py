@@ -86,7 +86,7 @@ def kaelthar_the_worldbreaker_art():
       J##$ J % %%$F
        %$# * * %#&
        %#$ | |%#$%
-       *#$%| | #$*             -Kaelthar the Worldbreaker
+       *#$%| | #$*             Kaelthar the Worldbreaker
       /$#' ) ( `%%\
      /#$# /   \ %$%\
     ooooO'     `Ooooo
@@ -143,7 +143,7 @@ def malakar_warden_of_the_abyss_art():
   / | || / /
  /  | ||/ /
 (_ | ,'/ /
-( `/ ||\/             -Malakar, Warden of the Abyss
+( `/ ||\/             Malakar, Warden of the Abyss
  \/ | \_
  |  \_  `_
   \ ,-,\,-,`,

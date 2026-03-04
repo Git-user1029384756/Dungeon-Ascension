@@ -2,6 +2,8 @@ import random, os
 from enemy import Enemy
 from combat import battle
 from player import Player
+from item import Consumable
+from loot import generate_loot
 from colorama import Fore, Style, init
 from art import intro_banner_art, death_art, boss_art
 from save_load import load_characters, save_characters
@@ -75,7 +77,8 @@ class GameEngine:
 
 
     def game_loop(self):
-        menu = {'1' :'Explore Floor', '2' : 'Use Potion', '3' : 'View Stats', '4' : 'Exit'}
+        menu = {'1' :'Explore Floor', '2' : 'Use Item', '3' : 'Player options', '4' : 'Exit'}
+        player_menu = {'1' : 'View Inventory', '2' : 'View Equipment', '3' : 'View Stats', '4' : 'Exit'}
 
         while self.running:
             for num, value in menu.items():
@@ -91,17 +94,74 @@ class GameEngine:
                 clear_terminal()
                 self.running = False
 
-            elif menu[option] == 'Use Potion':
-                self.player.use_potion()
-            
-            elif menu[option] == 'View Stats':
-                clear_terminal()
-                self.player.display_stats()
-                input('\nPress Enter to continue...\n')
+            elif menu[option] == 'Use Item':
+                items = {}
+                for item in self.player.inventory.items:
+                    if isinstance(item, Consumable):
+                        items[item] = item.quantity
+                
+                if items:
+                    print()
+                    for item, quantity in items.items():
+                        print(Fore.LIGHTWHITE_EX + item.name + f' x{quantity}')
+                    
+                    while True:
+                        print('\nType Exit to exit Inventory')
+                        consumable = input('Enter name of the item you wish to use : ').strip().lower()
+                        if consumable == 'exit':
+                            break
+                        for item in items:
+                            if consumable in item.name.lower():
+                                self.player.use_item(template_id= item.template_id)
+                                break
+                        else:
+                            print('Enter valid item name.')
+                else:
+                    print(Fore.LIGHTRED_EX + '\nYou do not have any consumables in your inventory\n')
 
             elif menu[option] == 'Explore Floor':
                 self.explore()
+            
+            elif menu[option] == 'Player options':
+                while True:
+                    print()
+                    for num, value in player_menu.items():
+                        print(f'{num}. {value}')
+                    
+                    while True:
+                        option = input('Choose an option : ').strip()
+                        if option in player_menu:
+                            break
+                        print('Invalid Option, select a number.')
+                
+                    if player_menu[option] == 'Exit':
+                        clear_terminal()
+                        break
+                    
+                    elif player_menu[option] == 'View Stats':
+                        clear_terminal()
+                        self.player.display_stats()
+                        input('\nPress Enter to continue...\n')
 
+                    elif player_menu[option] == 'View Equipment':
+                        self.player.display_equipment()
+                        choice = input('Would you like to equip/unequip?(y/n)').strip().lower()
+                        if choice == 'y':
+                            action = input('\nEquip or Unequip? ').strip().lower()
+
+                            if action == 'equip':
+                                self.player.display_inventory()
+                                item_name = input('Enter item name to equip: ').strip()
+                                result = self.player.equip_item_by_name(name= item_name)
+                                print(result)
+                            
+                            elif action == 'unequip':
+                                slot = input('\nEnter a slot to unequip (weapon/armor/etc) : ').strip().lower()
+                                result = self.player.unequip(slot= slot)
+                                print(result)
+                    
+                    elif player_menu[option] == 'View Inventory':
+                        self.player.display_inventory()
 
     def explore(self):
         encounter = self.roll_encounter_type()
@@ -141,20 +201,24 @@ class GameEngine:
                     self.player.current_floor = 1
                     self.player.victories_on_floor = 0
 
-        elif encounter == 'potion':
-            self.player.inventory['Potion'] += 1
-            print(f'\nYou find a potion while exploring the dungeon.\nYou now have {self.player.inventory["Potion"]} potion(s)\n')            
+        elif encounter == 'treasure':
+            item = generate_loot()
+            if item:
+                self.player.inventory.add_item(item= item)
+                print(f'\nYou discover a sturdy wooden chest tucked against the wall..\nYou pry open the chest and find ' + Fore.LIGHTYELLOW_EX + f'{item.name}' + ' inside\n')
+            else:
+                print('\nYou find a chest, but someone has already claimed its contents.\n')        
 
         else:
-            print('\nYou come across an empty room. Nothing interesting happens.\n')
+            print('\nThe room is empty… for now.\n')
     
 
     def roll_encounter_type(self):
         roll = random.random()
         if roll < .65:
             return 'combat'
-        elif roll < .9:
-            return 'potion'
+        elif roll < .85:
+            return 'treasure'
         else:
             return 'empty'
 

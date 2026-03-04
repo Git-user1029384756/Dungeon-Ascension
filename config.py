@@ -1,3 +1,5 @@
+from colorama import Fore
+
 CLASS_STATS = {
     'warrior' : {
         'max_hp' : 120,
@@ -20,7 +22,7 @@ CLASS_STATS = {
 ENEMY_STATS = {
     'goblin' : {
         'max_hp' : 80,
-        'attack' : 12,
+        'attack' : 13,
         'defense' : 4,
         'xp_reward' : 10
     },
@@ -67,6 +69,23 @@ FLOOR_ENEMIES = {
     3: ('orc', 'skeleton',),
     4: ('skeleton', 'strong orc',),
     5: ('malakar', 'kaelthar',)
+}
+
+
+RARITY_MULTIPLIER = {
+    'common': 1.0,
+    'uncommon': 1.2,
+    'rare': 1.5,
+    'epic': 1.8,
+    'legendary': 2.2
+}
+
+RARITY_COLORS = {
+    'common': Fore.LIGHTWHITE_EX,
+    'uncommon': Fore.LIGHTGREEN_EX,
+    'rare': Fore.LIGHTCYAN_EX,
+    'epic': Fore.LIGHTMAGENTA_EX,
+    'legendary': Fore.YELLOW
 }
 
 VICTORIES_REQUIRED = 5

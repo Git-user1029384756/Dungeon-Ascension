@@ -16,7 +16,7 @@ def load_characters():
 
 def save_characters(character):
     data = {
-        'save_version' : '1.5',
+        'save_version' : '2.0',
         'characters' : character
     }
     with open(FILE_PATH, 'w') as file:
