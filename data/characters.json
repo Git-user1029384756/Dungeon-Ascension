@@ -1,78 +1,31 @@
 {
-  "save_version": "2.0",
+  "save_version": "2.5",
   "characters": {
     "Developer": {
-      "class_type": "warrior",
-      "level": 55,
-      "xp": 20,
-      "max_hp": 660,
-      "current_hp": 660,
-      "attack": 177,
-      "defense": 105,
+      "class_type": "rogue",
+      "level": 1,
+      "xp": 50,
+      "max_hp": 90,
+      "current_hp": 58,
+      "attack": 20,
+      "defense": 5,
       "inventory": [
         {
           "template_id": "health_potion_percent",
           "name": "Major Health Potion",
           "slot": null,
+          "rarity": "unknown",
           "type": "Consumable",
           "effect_type": "heal_percent",
           "value": 50,
-          "quantity": 9
-        },
-        {
-          "template_id": "health_potion_flat",
-          "name": "Minor Health Potion",
-          "slot": null,
-          "type": "Consumable",
-          "effect_type": "heal_flat",
-          "value": 40,
           "quantity": 5
-        },
-        {
-          "template_id": "leather_armor",
-          "name": "Leather Armor",
-          "slot": "armor",
-          "type": "Equipment",
-          "rarity": "common",
-          "modifiers": {
-            "defense": 2
-          }
-        },
-        {
-          "template_id": "rusty_sword",
-          "name": "Rusty Sword",
-          "slot": "weapon",
-          "type": "Equipment",
-          "rarity": "common",
-          "modifiers": {
-            "attack": 3
-          }
         }
       ],
       "current_floor": 1,
-      "victories_on_floor": 2,
+      "victories_on_floor": 1,
       "equipment": {
-        "weapon": {
-          "template_id": "bronze_sword",
-          "name": "Bronze Sword",
-          "slot": "weapon",
-          "type": "Equipment",
-          "rarity": "uncommon",
-          "modifiers": {
-            "attack": 6
-          }
-        },
-        "armor": {
-          "template_id": "chainmail_armor",
-          "name": "Chainmail Armor",
-          "slot": "armor",
-          "type": "Equipment",
-          "rarity": "uncommon",
-          "modifiers": {
-            "max_hp": 12,
-            "defense": 1
-          }
-        }
+        "weapon": null,
+        "armor": null
       }
     }
   }

@@ -7,6 +7,8 @@ A Modular Command-Line RPG Engine in Python
 
 ## Version History
 
+- Current v2.5 
+
 ---
 
 ### v1 — Foundation
@@ -41,7 +43,7 @@ No gameplay changes — structural evolution only.
 
 ---
 
-### v2 — Equipment & Loot Expansion (Current)
+### v2 — Equipment & Loot Expansion
 
 v2 expands the dungeon prototype into a systemic RPG foundation.
 
@@ -148,6 +150,70 @@ Loot generation is unified across future systems (combat, exploration, events).
 
 ---
 
+### v2.5 — Engine Stabilization & Combat Decoupling (Current)
+
+v2.5 focuses on internal stability, structural tightening, and long-term maintainability.
+No new gameplay systems were introduced.
+
+## Major Refinements
+
+## Combat Refactor
+
+* Introduced `BattleResult` object
+* Combat logic no longer prints directly
+* Combat no longer applies loot
+* Combat now functions as a pure simulation module
+* Presentation handled exclusively by `GameEngine`
+
+This decouples simulation from UI and progression logic.
+
+---
+
+## Player & XP Improvements
+
+* XP system now supports multi-level progression in a single reward
+* Level-up logic returns structured feedback
+* Eliminated hardcoded XP subtraction values
+* Improved separation between logic and presentation
+
+---
+
+## Inventory & Persistence Fixes
+
+* Fixed encapsulation bug in `Inventory.from_list()`
+* Ensured proper object reconstruction during load
+* Confirmed v2 save compatibility
+* Prevented silent inventory corruption
+
+---
+
+## Item Interface Standardization
+
+* Unified item interface (all items now expose `rarity`)
+* Removed type-based branching in GameEngine
+* Strengthened polymorphic design across item subclasses
+
+---
+
+## Architectural Outcome
+
+v2.5 transforms Dungeon Ascension from a functional prototype into a structurally disciplined RPG engine foundation.
+
+The system is now:
+
+* Simulation-safe
+* Version-stable
+* Internally consistent
+* Ready for systemic expansion
+
+---
+
+## Planned v3
+
+* (future/planned)
+
+---
+
 ## Current Architectural Philosophy
 
 ### Core Principles
@@ -217,13 +283,6 @@ This preserves future flexibility for:
 8. Progress floors and face bosses.
 9. Reset dungeon progression after completion.
 
----
-
-## Planned v2.5 Refinements
-
-- (future/planned)
-
-No new gameplay systems will be introduced in v2.5.
 ---
 
 ## Technical Structure

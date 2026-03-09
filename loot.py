@@ -1,24 +1,24 @@
 import random, copy
-from config import RARITY_MULTIPLIER
 from item_templates import ITEM_TEMPLATES
 from item import Equipment, item_from_dict
-
+from config import RARITY_MULTIPLIER, DROP_CHANCE, CONSUMABLE_DROP_WEIGHT
 
 def generate_loot():
 
-    BASE_DROP_CHANCE = 0.4
-
-    if random.random() > BASE_DROP_CHANCE:
+    if random.random() > DROP_CHANCE:
         return None
     
-    catagery_chance = random.random()
+    catagory_chance = random.random()
 
-    if catagery_chance < .7:
+    if catagory_chance < CONSUMABLE_DROP_WEIGHT:
         catagory = 'consumables'
     else:
         catagory = 'equipment'
 
-    template_pool = ITEM_TEMPLATES[catagory]
+    template_pool = ITEM_TEMPLATES.get(catagory, {})
+    if not template_pool:
+        return None
+    
     template_id = random.choice(list(template_pool.keys()))
     template_copy = copy.deepcopy(template_pool[template_id])
 

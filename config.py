@@ -21,28 +21,36 @@ CLASS_STATS = {
 
 ENEMY_STATS = {
     'goblin' : {
+        'display_name' : None,
         'max_hp' : 80,
         'attack' : 13,
         'defense' : 4,
-        'xp_reward' : 10
+        'xp_reward' : 10,
+        'is_boss' : False
     },
     'orc' : {
+        'display_name' : None,
         'max_hp' : 160,
         'attack' : 20,
         'defense' : 10,
-        'xp_reward' : 20
+        'xp_reward' : 20,
+        'is_boss' : False
     },
     'skeleton' : {
+        'display_name' : None,
         'max_hp' : 60,
         'attack' : 25,
         'defense' : 15,
-        'xp_reward' : 25
+        'xp_reward' : 25,
+        'is_boss' : False
     },
     'strong orc' : {
+        'display_name' : None,
         'max_hp' : 220,
         'attack' : 50,
         'defense' : 30,
-        'xp_reward' : 50
+        'xp_reward' : 50,
+        'is_boss' : False
     },
     'malakar' : {
         'display_name' : 'Malakar, Warden of the Abyss',
@@ -88,5 +96,10 @@ RARITY_COLORS = {
     'legendary': Fore.YELLOW
 }
 
+EQUIPMENT_SLOTS = ['weapon', 'armor']
+MAX_FLOOR = max(FLOOR_ENEMIES.keys())
+CONSUMABLE_DROP_WEIGHT = 0.7
 VICTORIES_REQUIRED = 5
-MAX_FLOOR = 5
+XP_PER_LEVEL = 100
+DROP_CHANCE = 0.4
+DELAY = .7

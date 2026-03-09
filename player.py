@@ -3,7 +3,7 @@ from character import Character
 from inventory import Inventory
 from colorama import Fore, Style
 from item import Equipment, item_from_dict
-from config import VICTORIES_REQUIRED, RARITY_COLORS
+from config import XP_PER_LEVEL, VICTORIES_REQUIRED, RARITY_COLORS, EQUIPMENT_SLOTS
 
 class Player(Character):
     def __init__(self, name : str, class_type : str, max_hp : int, attack : int, defense : int):
@@ -15,10 +15,7 @@ class Player(Character):
         self.level = 1
         self.xp = 0
         self.inventory = Inventory()
-        self.equipment = {
-            'weapon' : None,
-            'armor' : None
-        }
+        self.equipment = {slot : None for slot in EQUIPMENT_SLOTS}
         self.current_floor = 1
         self.victories_on_floor = 0
     
@@ -69,7 +66,7 @@ class Player(Character):
                      )
         player.level = data['level']
         player.xp = data['xp']
-        player.current_hp = data['current_hp']
+        player.current_hp = min(data['current_hp'], player.max_hp)
         player.inventory = Inventory.from_list(data_list= data.get('inventory', []))
         saved_equipment = data.get("equipment", {})
         for slot in player.equipment:
@@ -142,36 +139,38 @@ class Player(Character):
     
     def add_xp(self, amount : int):
         self.xp += amount
-        while self.xp >= 100:
-            self.xp -= 100
+        levels_gained = 0
+        while self.xp >= XP_PER_LEVEL:
+            self.xp -= XP_PER_LEVEL
             self.level += 1
             self._base_max_hp += 10
             self._base_attack += 3
             self._base_defense += 1
             self.current_hp = self.max_hp
-            print(Style.BRIGHT + Fore.YELLOW + 'Level Up!')
+            levels_gained += 1
+
+        return levels_gained
 
     def use_item(self, template_id):
         items = self.inventory.find_all_by_template(template_id= template_id)
 
         if not items:
-            print('Item not Found.')
-            return
+            return'Item not Found.'
         
         item = items[0]
         
         if not isinstance(item, Consumable):
-            print('This item cannot be used')
-            return
+            return 'This item cannot be used'
         
         success = item.use(self)
 
-        if success:
-            print(f'You used {item.name}.')
-            if item.quantity < 1:
-                self.inventory.remove_item(item= item)
-        else:
-            print('This item has no effect.')
+        if not success:
+            return 'This item has no effect.'
+        
+        if item.quantity < 1:
+            self.inventory.remove_item(item= item)
+            
+        return f'You used {item.name}.'
 
     def _bar(self, current : int, maximum : int, length=20):
         filled = int(length * current / maximum)
@@ -201,19 +200,20 @@ class Player(Character):
     
     def display_inventory(self):
         print()
+        if len(self.inventory.items) < 1:
+            print('Inventory is empty')
+            return
+        
         for index, item in enumerate(self.inventory.items, 1):
-            if isinstance(item, Equipment):
-                color = RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX)
-                print(f'{index}- {color + item.name}')
-            else:
-                print(f'{index}- {Fore.LIGHTWHITE_EX + item.name}')
+            color = RARITY_COLORS.get(item.rarity) or Fore.LIGHTWHITE_EX
+            print(f'{index}- {color + item.name}')
         print()
     
     def display_equipment(self):
         print()
         for slot, item in self.equipment.items():
             if isinstance(item, Equipment):
-                color = RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX)
+                color = RARITY_COLORS.get(item.rarity) or Fore.LIGHTWHITE_EX
                 print(f'{slot.capitalize()} : {color + item.name if item else "Empty"}')
             else:
                 print(f'{slot.capitalize()} : {Fore.LIGHTWHITE_EX + item.name if item else "Empty"}')

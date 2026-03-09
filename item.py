@@ -1,15 +1,17 @@
 class Item:
-    def __init__(self, template_id : str, name : str, slot : str):
+    def __init__(self, template_id : str, name : str, slot : str = None, rarity : str = 'unknown'):
         self.template_id = template_id
         self.name = name
         self.slot = slot
+        self.rarity = rarity
 
     @classmethod
     def from_dict(cls, data : dict):
         return cls(
             template_id= data['template_id'],
             name= data['name'],
-            slot= data.get('slot')
+            slot= data.get('slot'),
+            rarity= data.get('rarity', 'unknown')
         )
 
     def to_dict(self):
@@ -17,14 +19,14 @@ class Item:
             'template_id' : self.template_id,
             'name' : self.name,
             'slot' : self.slot,
+            'rarity' : self.rarity,
             'type' : self.__class__.__name__
         }
-    
+
 
 class Equipment(Item):
     def __init__(self, template_id : str, name : str, slot : str, rarity : str, modifiers):
-        super().__init__(template_id, name, slot)
-        self.rarity = rarity
+        super().__init__(template_id, name, slot, rarity)
         self.modifiers = modifiers
     
     @classmethod
@@ -45,8 +47,8 @@ class Equipment(Item):
 
 
 class Consumable(Item):
-    def __init__(self, template_id, name, effect_type : str, value : int, quantity= 1, slot= None):
-        super().__init__(template_id, name, slot)
+    def __init__(self, template_id, name, effect_type : str, value : int, rarity, quantity= 1, slot= None):
+        super().__init__(template_id, name, slot, rarity)
         self.effect_type = effect_type
         self.value = value
         self.quantity = quantity
@@ -57,6 +59,7 @@ class Consumable(Item):
             template_id= data['template_id'],
             name= data['name'],
             slot= data.get('slot'),
+            rarity= data.get('rarity', 'unknown'),
             effect_type= data['effect_type'],
             value= data['value'],
             quantity= data.get('quantity', 1)
@@ -64,6 +67,7 @@ class Consumable(Item):
     
     def to_dict(self):
         data = super().to_dict()
+        data['rarity'] = self.rarity
         data['effect_type'] = self.effect_type
         data['value'] = self.value
         data['quantity'] = self.quantity

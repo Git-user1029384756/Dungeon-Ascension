@@ -1,4 +1,4 @@
-import random, os
+import random, os, time
 from enemy import Enemy
 from combat import battle
 from player import Player
@@ -7,10 +7,13 @@ from loot import generate_loot
 from colorama import Fore, Style, init
 from art import intro_banner_art, death_art, boss_art
 from save_load import load_characters, save_characters
-from config import CLASS_STATS, ENEMY_STATS, FLOOR_ENEMIES, VICTORIES_REQUIRED, MAX_FLOOR
+from config import CLASS_STATS, ENEMY_STATS, FLOOR_ENEMIES, VICTORIES_REQUIRED, MAX_FLOOR, DELAY, RARITY_COLORS
 
 init(autoreset=True)
 
+ENCOUNTER_COMBAT = "combat"
+ENCOUNTER_TREASURE = "treasure"
+ENCOUNTER_EMPTY = "empty"
 
 class GameEngine:
     def __init__(self):
@@ -112,7 +115,8 @@ class GameEngine:
                             break
                         for item in items:
                             if consumable in item.name.lower():
-                                self.player.use_item(template_id= item.template_id)
+                                result = self.player.use_item(template_id= item.template_id)
+                                print(result)
                                 break
                         else:
                             print('Enter valid item name.')
@@ -151,6 +155,7 @@ class GameEngine:
 
                             if action == 'equip':
                                 self.player.display_inventory()
+                                print()
                                 item_name = input('Enter item name to equip: ').strip()
                                 result = self.player.equip_item_by_name(name= item_name)
                                 print(result)
@@ -166,42 +171,12 @@ class GameEngine:
     def explore(self):
         encounter = self.roll_encounter_type()
 
-        if encounter == 'combat':
+        if encounter == ENCOUNTER_COMBAT:
             enemy = self.create_enemy_for_floor(floor= self.player.current_floor)
             battle_result = battle(player= self.player, enemy= enemy)
+            self.resolve_battle(battle_result= battle_result, enemy= enemy)
 
-            if battle_result == 'defeat':
-                self.player.current_hp = self.player.max_hp
-                self.player.victories_on_floor = 0
-                clear_terminal()
-                print(Fore.RED + death_art())
-                print(Style.BRIGHT + Fore.RED + '\nYour vision fades…\nYour soul escapes the dungeon…\nYou awaken once more…')
-
-                lower_floor = self.calculate_new_floor_on_defeat(current_floor= self.player.current_floor)
-
-                if self.player.current_floor > lower_floor:
-                    self.player.current_floor = lower_floor
-                    print(f'\n{self.player.name} will be revived in the previous Floor.')
-                self.running = False
-
-            else:
-                print(f'Earned {enemy.xp_reward} xp')
-                self.player.add_xp(amount= enemy.xp_reward)
-                self.player.victories_on_floor += 1
-                print(f'Victory, current level is {self.player.level} and current xp is {self.player.xp}\n')
-
-                if self.should_descend_floor(victories_on_floor= self.player.victories_on_floor, current_floor= self.player.current_floor):
-                    self.player.victories_on_floor = 0
-                    clear_terminal()
-                    print(Fore.CYAN + f'The air grows heavier…\nYou descend deeper into the dungeon…\n')
-                    self.player.current_floor += 1
-
-                elif self.player.current_floor == MAX_FLOOR:
-                    print(Style.BRIGHT + Fore.MAGENTA + 'Max Floor reached.\nResetting back to Floor 1\n')
-                    self.player.current_floor = 1
-                    self.player.victories_on_floor = 0
-
-        elif encounter == 'treasure':
+        elif encounter == ENCOUNTER_TREASURE:
             item = generate_loot()
             if item:
                 self.player.inventory.add_item(item= item)
@@ -213,20 +188,70 @@ class GameEngine:
             print('\nThe room is empty… for now.\n')
     
 
+    def resolve_battle(self, battle_result, enemy):
+        for line in battle_result.log:
+            if battle_result.is_boss:
+                print(line)
+                time.sleep(DELAY * 2.2)
+            else:
+                print(line)
+                time.sleep(DELAY)
+
+        if battle_result.result == 'defeat':
+            self.player.current_hp = self.player.max_hp
+            self.player.victories_on_floor = 0
+            clear_terminal()
+            print(Fore.RED + death_art())
+            print(Style.BRIGHT + Fore.RED + '\nYour vision fades…\nYour soul escapes the dungeon…\nYou awaken once more…')
+
+            lower_floor = self.calculate_new_floor_on_defeat(current_floor= self.player.current_floor)
+
+            if self.player.current_floor > lower_floor:
+                self.player.current_floor = lower_floor
+                print(f'\n{self.player.name} will be revived in the previous Floor.')
+            self.running = False
+
+        else:
+            print(f'Earned {enemy.xp_reward} xp')
+            levels = self.player.add_xp(amount= enemy.xp_reward)
+            if levels > 0:
+                if levels == 1:
+                    print(Style.BRIGHT + Fore.YELLOW + 'Level UP!')
+                else:
+                    print(Style.BRIGHT + Fore.YELLOW + f'Level Up! (+{levels} levels)')
+            self.player.victories_on_floor += 1
+            print(f'Victory, current level is {self.player.level} and current xp is {self.player.xp}\n')
+
+            if battle_result.loot:
+                self.player.inventory.add_item(battle_result.loot)
+                print(f'You found {(RARITY_COLORS.get(battle_result.loot.rarity) or Fore.LIGHTWHITE_EX) + battle_result.loot.name}!')
+
+            if self.should_descend_floor(victories_on_floor= self.player.victories_on_floor, current_floor= self.player.current_floor):
+                self.player.victories_on_floor = 0
+                clear_terminal()
+                print(Fore.CYAN + f'The air grows heavier…\nYou descend deeper into the dungeon…\n')
+                self.player.current_floor += 1
+
+            elif self.player.current_floor == MAX_FLOOR:
+                print(Style.BRIGHT + Fore.MAGENTA + 'Max Floor reached.\nResetting back to Floor 1\n')
+                self.player.current_floor = 1
+                self.player.victories_on_floor = 0
+    
+
     def roll_encounter_type(self):
         roll = random.random()
         if roll < .65:
-            return 'combat'
+            return ENCOUNTER_COMBAT
         elif roll < .85:
-            return 'treasure'
+            return ENCOUNTER_TREASURE
         else:
-            return 'empty'
+            return ENCOUNTER_EMPTY
 
 
     def create_enemy_for_floor(self, floor : int):
         enemy_name = random.choice(FLOOR_ENEMIES[floor])
         enemy_data = ENEMY_STATS[enemy_name]
-        display_name = enemy_data.get('display_name', enemy_name.title())
+        display_name = enemy_data.get('display_name') or enemy_name.title()
 
         enemy = Enemy(
         name= display_name,
