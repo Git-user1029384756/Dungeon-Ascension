@@ -11,6 +11,18 @@ A Modular Command-Line RPG Engine in Python
 
 ---
 
+## Features
+
+- Modular Python RPG engine
+- Turn-based tactical combat
+- Event-driven combat resolution
+- Data-driven item and ability templates
+- JSON save persistence
+- Equipment and inventory system
+- Resource-based abilities (mana)
+
+---
+
 ### v1 — Foundation
 
 Established the primary gameplay loop, combat system, floor progression, persistence, and modular structure.
@@ -471,3 +483,13 @@ Dungeon Ascension now represents:
 Each version strengthens structural foundations before expanding mechanics.
 
 The dungeon grows deeper...
+
+---
+
+## License
+
+Dungeon Ascension is licensed under the GNU GPL v3.
+
+You are free to study, modify, and redistribute the code,
+but any distributed derivative work must also remain open-source
+under the same license.
