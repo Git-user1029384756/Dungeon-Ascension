@@ -2,8 +2,8 @@ from item import Consumable
 from character import Character
 from inventory import Inventory
 from colorama import Fore, Style
-from item import Equipment, item_from_dict
-from config import XP_PER_LEVEL, VICTORIES_REQUIRED, RARITY_COLORS, EQUIPMENT_SLOTS
+from item import Equipment, Consumable, item_from_dict
+from config import XP_PER_LEVEL, VICTORIES_REQUIRED, RARITY_COLORS, EQUIPMENT_SLOTS, CLASS_ABILITIES
 
 class Player(Character):
     def __init__(self, name : str, class_type : str, max_hp : int, attack : int, defense : int):
@@ -11,11 +11,18 @@ class Player(Character):
         self._base_max_hp = max_hp
         self._base_attack = attack
         self._base_defense = defense
+        self._base_resources = {
+            'mana' : 50
+        }
+        self.current_resources = {
+            'mana' : 50
+        }
         self.class_type = class_type
         self.level = 1
         self.xp = 0
         self.inventory = Inventory()
         self.equipment = {slot : None for slot in EQUIPMENT_SLOTS}
+        self.abilities = list(CLASS_ABILITIES.get(self.class_type, []))
         self.current_floor = 1
         self.victories_on_floor = 0
     
@@ -54,6 +61,25 @@ class Player(Character):
     @defense.setter
     def defense(self, value):
         self._base_defense = value
+    
+    def get_resource(self, resource_type : str):
+        return self.current_resources.get(resource_type, 0)
+    
+    def get_max_resource(self, resource_type : str):
+        return self._base_resources.get(resource_type, 0)
+    
+    def spend_resource(self, resource_type : str, amount : int):
+        if self.get_resource(resource_type= resource_type) < amount:
+            return False
+        
+        self.current_resources[resource_type] -= amount
+        return True
+
+    def restore_resource(self, resource_type : str, amount : int):
+        self.current_resources[resource_type] = min(
+            self.get_resource(resource_type= resource_type) + amount,
+            self.get_max_resource(resource_type= resource_type)
+            )
 
     @classmethod
     def from_dict(cls, name : str, data : dict):
@@ -67,11 +93,14 @@ class Player(Character):
         player.level = data['level']
         player.xp = data['xp']
         player.current_hp = min(data['current_hp'], player.max_hp)
+        player._base_resources = data.get('base_resources', {'mana' : 50})
+        player.current_resources = data.get('current_resources', player._base_resources.copy())
         player.inventory = Inventory.from_list(data_list= data.get('inventory', []))
         saved_equipment = data.get("equipment", {})
         for slot in player.equipment:
             saved_item = saved_equipment.get(slot)
             player.equipment[slot] = item_from_dict(item= saved_item) if saved_item is not None else None
+        player.abilities = data.get('abilities', CLASS_ABILITIES.get(player.class_type, []))
         player.current_floor = data['current_floor']
         player.victories_on_floor = data['victories_on_floor']
         return player
@@ -84,9 +113,12 @@ class Player(Character):
          'current_hp' : self.current_hp,
          'attack' : self._base_attack,
          'defense' : self._base_defense,
+         'base_resources' : self._base_resources,
+         'current_resources' : self.current_resources,
          'inventory' : self.inventory.to_list(),
          'current_floor' : self.current_floor,
          'victories_on_floor' : self.victories_on_floor,
+         'abilities' : self.abilities,
          'equipment' : {
              slot : item.to_dict() if item else None
              for slot, item in self.equipment.items()
@@ -147,6 +179,8 @@ class Player(Character):
             self._base_attack += 3
             self._base_defense += 1
             self.current_hp = self.max_hp
+            for resource, max_value in self._base_resources.items():
+                self.current_resources[resource] = max_value
             levels_gained += 1
 
         return levels_gained
@@ -188,7 +222,13 @@ class Player(Character):
         print(f'║ XP           : {f"{self.xp}/100":<21}')
         print(f'║               [{self._bar(self.xp, 100)}] ')
         print(f'║ HP           : {self.current_hp}/{self.max_hp:<18} ')
-        print(f'║               [{self._bar(self.current_hp, self.max_hp)}] ')        
+        print(f'║               [{self._bar(self.current_hp, self.max_hp)}] ')
+
+        for resource, maximum in self._base_resources.items():
+            current = self.current_resources.get(resource, 0)
+
+            print(f'║ {resource.capitalize():<12}: {current}/{maximum:<18} ')
+            print(f'║               [{self._bar(current, maximum)}] ')
         print()
 
         print(f'║ Attack       : {self.attack:<21} ')
@@ -206,7 +246,10 @@ class Player(Character):
         
         for index, item in enumerate(self.inventory.items, 1):
             color = RARITY_COLORS.get(item.rarity) or Fore.LIGHTWHITE_EX
-            print(f'{index}- {color + item.name}')
+            if isinstance(item, Consumable):
+                print(f'{index}- {color + item.name} x{item.quantity}')
+            else:
+                print(f'{index}- {color + item.name}')
         print()
     
     def display_equipment(self):

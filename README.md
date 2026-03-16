@@ -7,7 +7,7 @@ A Modular Command-Line RPG Engine in Python
 
 ## Version History
 
-- Current v2.5 
+- Current v3.0
 
 ---
 
@@ -150,7 +150,7 @@ Loot generation is unified across future systems (combat, exploration, events).
 
 ---
 
-### v2.5 — Engine Stabilization & Combat Decoupling (Current)
+### v2.5 — Engine Stabilization & Combat Decoupling
 
 v2.5 focuses on internal stability, structural tightening, and long-term maintainability.
 No new gameplay systems were introduced.
@@ -208,10 +208,101 @@ The system is now:
 
 ---
 
-## Planned v3
+## v3 — Combat Ability System & Resource Mechanics (Current)
 
-* (future/planned)
+v3 introduces player abilities, resource management, and expanded combat decision-making.
 
+This version transitions combat from a purely automated system into a system where players actively choose abilities and manage resources.
+
+---
+
+## Ability System
+
+* Introduced `Ability` class
+* Data-driven `ability_templates`
+* Ability factory creation from templates
+* Ability resource costs
+* Ability damage and healing effects
+* Ability validation and resource checks before execution
+
+Abilities are designed to remain fully data-driven and extensible.
+
+---
+
+## Ability Result System
+
+* Introduced `AbilityResult` object
+* Abilities now return structured results rather than mutating combat state directly
+* Combat engine applies results after validation
+* Enables future expansion into status effects and advanced mechanics
+
+This maintains separation between ability logic and combat resolution.
+
+---
+
+## Resource System
+
+* Player now supports dynamic resource pools
+* Initial implementation includes `mana`
+* Resources stored in flexible dictionary structure
+* Abilities consume resources through the player resource API
+* Resources automatically restore on level-up
+
+This system is designed to support future resource types (stamina, rage, energy).
+
+---
+
+## Combat Expansion
+
+Combat now supports:
+
+* Basic attacks
+* Ability usage
+* Resource consumption
+* Tactical decision making
+* Ability-driven damage
+
+---
+
+## Consumable Expansion
+
+Consumables now support additional effect types:
+
+* `heal_flat`
+* `heal_percent`
+* `restore_mana` (new)
+
+New consumables introduced:
+
+* Minor Mana Potion
+* Major Mana Potion
+
+This allows players to recover combat resources without requiring character defeat.
+
+---
+
+## Architectural Outcome
+
+v3 transforms Dungeon Ascension combat from a deterministic loop into a tactical resource-driven system.
+
+The engine now supports:
+
+* Data-driven abilities
+* Resource-based mechanics
+* Expanded consumable effects
+* Tactical player decision making
+
+All systems maintain strict modular boundaries and template-driven configuration.
+
+(save compatible with v2 and above)
+
+---
+
+## Planned v3.5
+
+- (future/planned)
+
+No new gameplay systems will be introduced in v3.5.
 ---
 
 ## Current Architectural Philosophy
@@ -275,7 +366,7 @@ This preserves future flexibility for:
 
 1. Create or load a character.
 2. Explore dungeon floors via randomized events.
-3. Engage in automated combat.
+3. Engage in tactical turn-based combat using attacks and abilities.
 4. Generate loot via centralized loot system.
 5. Equip or store items.
 6. Use consumables strategically.
@@ -308,14 +399,15 @@ requirements.txt     # Dependencies
 
 ## Combat System
 
-* Automated turn-based combat
-* Combat owns damage calculation
+* Turn-based combat
+* Basic attacks and player abilities
+* Ability resource costs and validation
 * Dynamic stat resolution
 * XP rewards
 * Boss archetypes
 * Floor-based difficulty scaling
 
-Combat remains deterministic but extensible.
+Combat now supports tactical decision-making while preserving deterministic damage resolution.
 
 ---
 

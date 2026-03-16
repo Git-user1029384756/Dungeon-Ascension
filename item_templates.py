@@ -16,6 +16,22 @@ ITEM_TEMPLATES = {
             'effect_type' : 'heal_flat',
             'value' : 40,
             'quantity' : 1
+        },
+        'mana_potion_minor': {
+            'type': 'Consumable',
+            'template_id': 'mana_potion_minor',
+            'name': 'Minor Mana Potion',
+            'effect_type': 'restore_mana',
+            'value': 25,
+            'quantity': 1
+        },
+        'mana_potion_major': {
+            'type': 'Consumable',
+            'template_id': 'mana_potion_major',
+            'name': 'Major Mana Potion',
+            'effect_type': 'restore_mana',
+            'value': 50,
+            'quantity': 1
         }
     },
 

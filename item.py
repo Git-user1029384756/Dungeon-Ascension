@@ -77,17 +77,30 @@ class Consumable(Item):
         if self.quantity < 1:
             return False
         
-        if player.current_hp >= player.max_hp:
-                return False
-        
         if self.effect_type == 'heal_percent':
+            if player.current_hp >= player.max_hp:
+                return False
+            
             heal_amount = int(player.max_hp * (self.value / 100))
+            player.current_hp = min(player.current_hp + heal_amount, player.max_hp)
+        
         elif self.effect_type == 'heal_flat':
+            if player.current_hp >= player.max_hp:
+                return False
+            
             heal_amount = self.value
+            player.current_hp = min(player.current_hp + heal_amount, player.max_hp)
+
+        elif self.effect_type == 'restore_mana':
+            if player.get_resource(resource_type= 'mana') >= player.get_max_resource(resource_type= 'mana'):
+                return False
+            
+            player.restore_resource(resource_type= 'mana', amount= self.value)
+            
         else:
             return False
         
-        player.current_hp = min(player.current_hp + heal_amount, player.max_hp)
+        
         self.quantity -= 1
 
         return True

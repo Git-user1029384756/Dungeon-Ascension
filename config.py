@@ -71,6 +71,13 @@ ENEMY_STATS = {
 }
 
 
+CLASS_ABILITIES = {
+    'warrior': ('power_strike',),
+    'rogue' : ('quick_strike',),
+    'mage': ('fireball',)
+}
+
+
 FLOOR_ENEMIES = {
     1: ('goblin',),
     2: ('goblin', 'orc',),
@@ -88,6 +95,7 @@ RARITY_MULTIPLIER = {
     'legendary': 2.2
 }
 
+
 RARITY_COLORS = {
     'common': Fore.LIGHTWHITE_EX,
     'uncommon': Fore.LIGHTGREEN_EX,
@@ -95,6 +103,7 @@ RARITY_COLORS = {
     'epic': Fore.LIGHTMAGENTA_EX,
     'legendary': Fore.YELLOW
 }
+
 
 EQUIPMENT_SLOTS = ['weapon', 'armor']
 MAX_FLOOR = max(FLOOR_ENEMIES.keys())

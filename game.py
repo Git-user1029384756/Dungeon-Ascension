@@ -1,4 +1,4 @@
-import random, os, time
+import random, os
 from enemy import Enemy
 from combat import battle
 from player import Player
@@ -182,23 +182,18 @@ class GameEngine:
                 self.player.inventory.add_item(item= item)
                 print(f'\nYou discover a sturdy wooden chest tucked against the wall..\nYou pry open the chest and find ' + Fore.LIGHTYELLOW_EX + f'{item.name}' + ' inside\n')
             else:
-                print('\nYou find a chest, but someone has already claimed its contents.\n')        
+                print('\nYou find a chest, but someone has already claimed its contents.\n')
 
         else:
             print('\nThe room is empty… for now.\n')
-    
+
 
     def resolve_battle(self, battle_result, enemy):
-        for line in battle_result.log:
-            if battle_result.is_boss:
-                print(line)
-                time.sleep(DELAY * 2.2)
-            else:
-                print(line)
-                time.sleep(DELAY)
 
         if battle_result.result == 'defeat':
             self.player.current_hp = self.player.max_hp
+            for resource, value in self.player._base_resources.items():
+                self.player.restore_resource(resource_type= resource, amount= value)
             self.player.victories_on_floor = 0
             clear_terminal()
             print(Fore.RED + death_art())
