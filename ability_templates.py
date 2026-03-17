@@ -35,7 +35,7 @@ ABILITY_TEMPLATES = {
         'category': 'offensive',
 
         'resource_cost': {
-            'mana': 12
+            'mana': 10
         },
 
         'effects': [

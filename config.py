@@ -7,9 +7,9 @@ CLASS_STATS = {
         'defense' : 10
     },
     'rogue' : {
-        'max_hp' : 90,
+        'max_hp' : 85,
         'attack' : 20,
-        'defense' : 5
+        'defense' : 6
     },
     'mage' : {
         'max_hp' : 60,
@@ -23,7 +23,7 @@ ENEMY_STATS = {
     'goblin' : {
         'display_name' : None,
         'max_hp' : 80,
-        'attack' : 13,
+        'attack' : 7,
         'defense' : 4,
         'xp_reward' : 10,
         'is_boss' : False

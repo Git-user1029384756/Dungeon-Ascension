@@ -1,5 +1,5 @@
 {
-  "save_version": "2.5",
+  "save_version": "3.5",
   "characters": {
     "Developer": {
       "class_type": "rogue",
@@ -9,6 +9,12 @@
       "current_hp": 58,
       "attack": 20,
       "defense": 5,
+      "base_resources": {
+        "mana": 50
+      },
+      "current_resources": {
+        "mana": 50
+      },
       "inventory": [
         {
           "template_id": "health_potion_percent",
@@ -23,6 +29,9 @@
       ],
       "current_floor": 1,
       "victories_on_floor": 1,
+      "abilities": [
+        "quick_strike"
+      ],
       "equipment": {
         "weapon": null,
         "armor": null

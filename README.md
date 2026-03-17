@@ -7,7 +7,19 @@ A Modular Command-Line RPG Engine in Python
 
 ## Version History
 
-- Current v3.0
+- Current v3.5
+- Next planned: v4
+---
+
+## Features
+
+- Modular Python RPG engine
+- Turn-based tactical combat
+- Event-driven combat resolution
+- Data-driven item and ability templates
+- JSON save persistence
+- Equipment and inventory system
+- Resource-based abilities (mana)
 
 ---
 
@@ -208,7 +220,7 @@ The system is now:
 
 ---
 
-## v3 — Combat Ability System & Resource Mechanics (Current)
+## v3 — Combat Ability System & Resource Mechanics
 
 v3 introduces player abilities, resource management, and expanded combat decision-making.
 
@@ -270,7 +282,7 @@ Consumables now support additional effect types:
 
 * `heal_flat`
 * `heal_percent`
-* `restore_mana` (new)
+* `restore_mana`
 
 New consumables introduced:
 
@@ -298,11 +310,63 @@ All systems maintain strict modular boundaries and template-driven configuration
 
 ---
 
-## Planned v3.5
+## v3.5 — Combat Resolution Refactor (Current)
 
-- (future/planned)
+v3.5 focuses on stabilizing the internal combat architecture introduced in v3.
 
-No new gameplay systems will be introduced in v3.5.
+No new gameplay systems were added. Instead, this version refines how abilities interact with combat resolution and prepares the engine for future mechanics such as status effects.
+
+### Major Refinements
+
+#### Event-Driven Combat Resolution
+
+* Ability execution now produces structured **events**
+* Combat resolves events rather than abilities mutating targets directly
+* Damage and healing are applied through a centralized resolver
+
+This ensures that combat rules remain consistent regardless of ability complexity.
+
+---
+
+#### Ability Result Improvements
+
+* Ability events now include explicit **source** and **target** references
+* Supports future mechanics such as:
+  * damage reflection
+  * lifesteal
+  * status effect triggers
+  * conditional effects
+
+---
+
+#### Damage Mitigation Unification
+
+* Combat now centralizes damage mitigation logic
+* Both basic attacks and ability damage pass through the same combat rules
+* Prevents divergence between attack damage and ability damage
+
+---
+
+#### Combat Architecture Outcome
+
+v3.5 completes the transition to an **event-driven combat architecture**.
+
+Abilities now describe **what happens**, while the combat engine determines **how it is resolved**.
+
+This separation prepares the engine for future mechanics including:
+
+* status effects
+* conditional triggers
+* advanced damage modifiers
+* turn-based effect processing
+
+(save compatible with v2 and above)
+---
+
+## Planned v4
+
+- (planned/future)
+
 ---
 
 ## Current Architectural Philosophy
@@ -471,3 +535,13 @@ Dungeon Ascension now represents:
 Each version strengthens structural foundations before expanding mechanics.
 
 The dungeon grows deeper...
+
+---
+
+## License
+
+Dungeon Ascension is licensed under the GNU GPL v3.
+
+You are free to study, modify, and redistribute the code,
+but any distributed derivative work must also remain open-source
+under the same license.

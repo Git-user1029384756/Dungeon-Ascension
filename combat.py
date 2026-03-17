@@ -1,7 +1,6 @@
 import time
 from loot import generate_loot
 from colorama import Fore, Style
-from abilities import ability_from_template
 
 class BattleResult:
     def __init__(self, result : str, log : list[str], loot= None, is_boss : bool = False):
@@ -11,31 +10,38 @@ class BattleResult:
         self.is_boss = is_boss
 
 
-def calculate_damage(attacker, defender):
-    return max(attacker.attack - defender.defense, 1)
+def mitigate_damage(raw_damage : int, target):
+    return max(raw_damage - target.defense, 1)
 
 
-def apply_ability_result(result, target, log):
-    for dmg in result.damage_events:
-        amount = dmg['amount']
-        before = target.current_hp
-        target.take_damage(amount= amount)
+def apply_ability_result(result, log):
+    for event in result.events:
 
-        log.append(Fore.GREEN + f'{target.name} takes {before - target.current_hp} damage!')
-    
-    for heal in result.healing_events:
-        amount = heal['amount']
-        before = target.current_hp
-        target.current_hp = min(target.current_hp + amount, target.max_hp)
+        event_type = event['type']
+        source = event['source']
+        target = event['target']
 
-        log.append(Fore.GREEN + f'{target.name} heals {target.current_hp - before} HP!')
+        if event_type == 'damage':
+            raw = event['amount']
+            damage = mitigate_damage(raw_damage= raw, target= target)
+            before = target.current_hp
+            target.take_damage(amount= damage)
+
+            log.append(Fore.GREEN + f'{target.name} takes {before - target.current_hp} damage!')
+
+        elif event_type == 'heal':
+            amount = event['amount']
+            before = target.current_hp
+            target.current_hp = min(target.current_hp + amount, target.max_hp)
+
+            log.append(Fore.GREEN + f'{target.name} heals {target.current_hp - before} HP!')
 
 
 menu = {'1' : 'Attack', '2' : 'Ability'}
 def player_turn(player, enemy, log):
 
     while True:
-        print('\nChoose Action')
+        print('Choose Action')
         for i, v in menu.items():
             print(f'{i}. {v}')
         
@@ -47,7 +53,8 @@ def player_turn(player, enemy, log):
 
         elif menu[choice] == 'Attack':
 
-            damage = calculate_damage(attacker= player, defender= enemy)
+            raw = player.attack
+            damage = mitigate_damage(raw_damage= raw, target= enemy)
             before = enemy.current_hp
             enemy.take_damage(damage)
 
@@ -62,8 +69,7 @@ def player_turn(player, enemy, log):
 
                 print('0. Back')
 
-                for i, ability_id in enumerate(player.abilities, start= 1):
-                    ability = ability_from_template(template_id= ability_id)
+                for i, ability in enumerate(player.abilities, start= 1):
                     cost = ability.resource_cost.get('mana', 0)
                     print(f'{i}. {ability.name} (Mana : {cost}) [You: {player.get_resource(resource_type= "mana")}]')
                 
@@ -74,6 +80,7 @@ def player_turn(player, enemy, log):
                     continue
 
                 if choice == '0':
+                    print()
                     break
                 
                 selection = int(choice) -1
@@ -82,14 +89,13 @@ def player_turn(player, enemy, log):
                     print('Invalid Choice')
                     continue
                 
-                ability_id = player.abilities[selection]
-                ability = ability_from_template(template_id= ability_id)
+                ability = player.abilities[selection]
                 result = ability.use(caster= player, target= enemy)
 
                 for message in result.messages:
                     log.append(message)
                 
-                apply_ability_result(result= result, target= enemy, log= log)
+                apply_ability_result(result= result, log= log)
 
                 return
 
@@ -133,7 +139,8 @@ def battle(player, enemy) -> BattleResult:
             )
 
 
-        damage_to_player = calculate_damage(attacker= enemy, defender= player)
+        raw = enemy.attack
+        damage_to_player = mitigate_damage(raw_damage= raw, target= player)
         current_player_hp = player.current_hp
         player.take_damage(damage_to_player)
 

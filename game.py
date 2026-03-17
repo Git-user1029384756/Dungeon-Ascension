@@ -112,6 +112,7 @@ class GameEngine:
                         print('\nType Exit to exit Inventory')
                         consumable = input('Enter name of the item you wish to use : ').strip().lower()
                         if consumable == 'exit':
+                            print()
                             break
                         for item in items:
                             if consumable in item.name.lower():
