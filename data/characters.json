@@ -1,14 +1,20 @@
 {
-  "save_version": "2.5",
+  "save_version": "4.0",
   "characters": {
     "Developer": {
       "class_type": "rogue",
       "level": 1,
-      "xp": 50,
+      "xp": 80,
       "max_hp": 90,
-      "current_hp": 58,
+      "current_hp": 48,
       "attack": 20,
       "defense": 5,
+      "base_resources": {
+        "mana": 50
+      },
+      "current_resources": {
+        "mana": 23
+      },
       "inventory": [
         {
           "template_id": "health_potion_percent",
@@ -18,13 +24,36 @@
           "type": "Consumable",
           "effect_type": "heal_percent",
           "value": 50,
-          "quantity": 5
+          "quantity": 4
+        },
+        {
+          "template_id": "health_potion_flat",
+          "name": "Minor Health Potion",
+          "slot": null,
+          "rarity": "unknown",
+          "type": "Consumable",
+          "effect_type": "heal_flat",
+          "value": 40,
+          "quantity": 1
         }
       ],
       "current_floor": 1,
-      "victories_on_floor": 1,
+      "victories_on_floor": 4,
+      "abilities": [
+        "poison_strike",
+        "quick_strike"
+      ],
       "equipment": {
-        "weapon": null,
+        "weapon": {
+          "template_id": "bronze_sword",
+          "name": "Bronze Sword",
+          "slot": "weapon",
+          "rarity": "uncommon",
+          "type": "Equipment",
+          "modifiers": {
+            "attack": 6
+          }
+        },
         "armor": null
       }
     }

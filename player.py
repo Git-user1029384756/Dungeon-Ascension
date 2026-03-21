@@ -1,7 +1,8 @@
+from colorama import Fore
 from item import Consumable
 from character import Character
 from inventory import Inventory
-from colorama import Fore, Style
+from abilities import ability_from_template
 from item import Equipment, Consumable, item_from_dict
 from config import XP_PER_LEVEL, VICTORIES_REQUIRED, RARITY_COLORS, EQUIPMENT_SLOTS, CLASS_ABILITIES
 
@@ -22,56 +23,58 @@ class Player(Character):
         self.xp = 0
         self.inventory = Inventory()
         self.equipment = {slot : None for slot in EQUIPMENT_SLOTS}
-        self.abilities = list(CLASS_ABILITIES.get(self.class_type, []))
+        self.abilities = [
+            ability_from_template(template_id= template_id) for template_id in CLASS_ABILITIES.get(self.class_type, [])
+            ]
         self.current_floor = 1
         self.victories_on_floor = 0
-    
+
     @property
     def max_hp(self):
-        total = self._base_max_hp
+        total = super().max_hp
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('max_hp', 0)
         return total
-    
+
     @max_hp.setter
     def max_hp(self, value):
         self._base_max_hp = value
-    
+
     @property
     def attack(self):
-        total = self._base_attack
+        total = super().attack
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('attack', 0)
         return total
-    
+
     @attack.setter
     def attack(self, value):
         self._base_attack = value
-    
+
     @property
     def defense(self):
-        total = self._base_defense
+        total = super().defense
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('defense', 0)
         return total
-    
+
     @defense.setter
     def defense(self, value):
         self._base_defense = value
-    
+
     def get_resource(self, resource_type : str):
         return self.current_resources.get(resource_type, 0)
-    
+
     def get_max_resource(self, resource_type : str):
         return self._base_resources.get(resource_type, 0)
-    
+
     def spend_resource(self, resource_type : str, amount : int):
         if self.get_resource(resource_type= resource_type) < amount:
             return False
-        
+
         self.current_resources[resource_type] -= amount
         return True
 
@@ -92,7 +95,6 @@ class Player(Character):
                      )
         player.level = data['level']
         player.xp = data['xp']
-        player.current_hp = min(data['current_hp'], player.max_hp)
         player._base_resources = data.get('base_resources', {'mana' : 50})
         player.current_resources = data.get('current_resources', player._base_resources.copy())
         player.inventory = Inventory.from_list(data_list= data.get('inventory', []))
@@ -100,11 +102,21 @@ class Player(Character):
         for slot in player.equipment:
             saved_item = saved_equipment.get(slot)
             player.equipment[slot] = item_from_dict(item= saved_item) if saved_item is not None else None
-        player.abilities = data.get('abilities', CLASS_ABILITIES.get(player.class_type, []))
+
+        saved_hp = data['current_hp']
+        old_max = data['max_hp']
+        player.current_hp = saved_hp
+        player.rescale_current_hp(old_max_hp= old_max)
+        class_abilities = set(CLASS_ABILITIES.get(player.class_type, []))
+        saved_abilities = set(data.get('abilities', []))
+        all_abilities = class_abilities | saved_abilities
+        player.abilities = [
+            ability_from_template(template_id= template_id) for template_id in all_abilities
+        ]
         player.current_floor = data['current_floor']
         player.victories_on_floor = data['victories_on_floor']
         return player
-    
+
     def to_dict(self):
         return {'class_type' : self.class_type,
          'level' : self.level,
@@ -118,57 +130,58 @@ class Player(Character):
          'inventory' : self.inventory.to_list(),
          'current_floor' : self.current_floor,
          'victories_on_floor' : self.victories_on_floor,
-         'abilities' : self.abilities,
+         'abilities' : [ability.template_id for ability in self.abilities],
          'equipment' : {
              slot : item.to_dict() if item else None
              for slot, item in self.equipment.items()
          }}
-    
+
     def get_equipable_items(self):
         return [item for item in self.inventory.items if isinstance(item, Equipment)]
-    
+
     def equip_item_by_name(self, name : str):
         for item in self.inventory.items:
             if isinstance(item, Equipment) and item.name.lower() == name.lower():
                 return self.equip_item(item= item)
         else:
             return "Item not found or not equipable."
-    
+
     def equip_item(self, item : Equipment):
         slot = item.slot
 
         if slot not in self.equipment:
             return 'Invalid Equipment slot'
-        
+
+        old_max = self.max_hp
+
         if self.equipment[slot] is not None:
             self.unequip(slot= slot)
 
         self.inventory.remove_item(item= item)
         self.equipment[slot] = item
 
-        if self.current_hp > self.max_hp:
-            self.current_hp = self.max_hp
-            
-        
+        self.rescale_current_hp(old_max_hp= old_max)
+
         return f'{RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX) + item.name} equipped in {slot} slot.'
 
     def unequip(self, slot : str):
         if slot not in self.equipment:
             return 'Invalid slot.'
-        
+
         item = self.equipment.get(slot)
 
         if item is None:
             return 'Slot already empty.'
-        
+
+        old_max = self.max_hp
+
         self.equipment[slot] = None
         self.inventory.add_item(item= item)
 
-        if self.current_hp > self.max_hp:
-            self.current_hp = self.max_hp
-        
+        self.rescale_current_hp(old_max_hp= old_max)
+
         return f'{RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX) + item.name} unequipped.'
-    
+
     def add_xp(self, amount : int):
         self.xp += amount
         levels_gained = 0
@@ -190,20 +203,20 @@ class Player(Character):
 
         if not items:
             return'Item not Found.'
-        
+
         item = items[0]
-        
+
         if not isinstance(item, Consumable):
             return 'This item cannot be used'
-        
+
         success = item.use(self)
 
         if not success:
             return 'This item has no effect.'
-        
+
         if item.quantity < 1:
             self.inventory.remove_item(item= item)
-            
+    
         return f'You used {item.name}.'
 
     def _bar(self, current : int, maximum : int, length=20):
@@ -237,7 +250,7 @@ class Player(Character):
 
         print(f'║ Victories    : {self.victories_on_floor}/{VICTORIES_REQUIRED:<19} ')
         print('╚' + '═' * 38 + '╝')
-    
+
     def display_inventory(self):
         print()
         if len(self.inventory.items) < 1:
@@ -251,7 +264,7 @@ class Player(Character):
             else:
                 print(f'{index}- {color + item.name}')
         print()
-    
+
     def display_equipment(self):
         print()
         for slot, item in self.equipment.items():

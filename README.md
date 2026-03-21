@@ -7,7 +7,8 @@ A Modular Command-Line RPG Engine in Python
 
 ## Version History
 
-- Current v3.0
+- Current v4
+- Next planned: v4.5
 
 ---
 
@@ -16,10 +17,12 @@ A Modular Command-Line RPG Engine in Python
 - Modular Python RPG engine
 - Turn-based tactical combat
 - Event-driven combat resolution
+- State-driven combat (status effects)
 - Data-driven item and ability templates
 - JSON save persistence
 - Equipment and inventory system
 - Resource-based abilities (mana)
+- Persistent status effects with duration and modifiers
 
 ---
 
@@ -220,7 +223,7 @@ The system is now:
 
 ---
 
-## v3 — Combat Ability System & Resource Mechanics (Current)
+## v3 — Combat Ability System & Resource Mechanics
 
 v3 introduces player abilities, resource management, and expanded combat decision-making.
 
@@ -306,15 +309,208 @@ The engine now supports:
 
 All systems maintain strict modular boundaries and template-driven configuration.
 
+---
+
+## v3.5 — Combat Resolution Refactor
+
+v3.5 focuses on stabilizing the internal combat architecture introduced in v3.
+
+No new gameplay systems were added. Instead, this version refines how abilities interact with combat resolution and prepares the engine for future mechanics such as status effects.
+
+### Major Refinements
+
+#### Event-Driven Combat Resolution
+
+* Ability execution now produces structured **events**
+* Combat resolves events rather than abilities mutating targets directly
+* Damage and healing are applied through a centralized resolver
+
+This ensures that combat rules remain consistent regardless of ability complexity.
+
+---
+
+#### Ability Result Improvements
+
+* Ability events now include explicit **source** and **target** references
+* Supports future mechanics such as:
+  * damage reflection
+  * lifesteal
+  * status effect triggers
+  * conditional effects
+
+---
+
+#### Damage Mitigation Unification
+
+* Combat now centralizes damage mitigation logic
+* Both basic attacks and ability damage pass through the same combat rules
+* Prevents divergence between attack damage and ability damage
+
+---
+
+#### Combat Architecture Outcome
+
+v3.5 completes the transition to an **event-driven combat architecture**.
+
+Abilities now describe **what happens**, while the combat engine determines **how it is resolved**.
+
+This separation prepares the engine for future mechanics including:
+
+* status effects (implemented in v4)
+* conditional triggers
+* advanced damage modifiers
+* turn-based effect processing
+
 (save compatible with v2 and above)
 
 ---
 
-## Planned v3.5
+## v4 — Status Effects & State-Driven Combat (Current)
 
-- (future/planned)
+v4 introduces a full status effect system and completes the transition from event-driven combat into a state-driven combat model.
 
-No new gameplay systems will be introduced in v3.5.
+This version focuses on **deepening combat mechanics vertically** rather than expanding feature breadth.
+
+---
+
+## Status Effect System
+
+* Introduced `StatusEffect` base class
+* Effects persist across turns with duration tracking
+* Effects execute through:
+  * `on_apply`
+  * `on_turn_start`
+  * `on_turn_end`
+  * `on_expire`
+* Effects are processed in a stable iteration model (safe against mutation)
+
+This establishes a flexible foundation for all future combat modifiers.
+
+---
+
+## Effect Types
+
+### Damage Over Time (DoT)
+
+* Implemented via `DamageOverTime`
+* Applies damage each turn
+* Non-stackable by default
+* Refreshes duration instead of duplicating
+* Displays remaining duration in combat logs
+
+---
+
+### Stat Modifiers
+
+* Implemented via `StatModifier`
+* Dynamically modifies:
+  * attack
+  * defense
+  * max HP
+* Fully integrated with the stat property system
+* Effects apply and expire without permanently mutating base stats
+
+---
+
+## Status Effect Lifecycle Management
+
+* Effects tick down each turn
+* Expired effects are removed safely
+* Expiration triggers explicit feedback (`on_expire`)
+* All effect updates are centrally managed through `Character`
+
+This ensures deterministic and debuggable behavior.
+
+---
+
+## Stacking & Refresh Logic
+
+* Effects define their own stacking rules (`stackable`)
+* Non-stackable effects refresh duration instead of stacking
+* Prevents unintended exponential scaling
+* Maintains combat readability and balance
+
+---
+
+## Combat Integration
+
+* Status effects are applied through the existing event system
+* `AbilityResult` now supports `status_effect` events
+* Combat engine remains the sole authority for applying outcomes
+* Status effects interact seamlessly with:
+  * damage mitigation
+  * stat calculation
+  * turn processing
+
+---
+
+## Dynamic Stat Pipeline Completion
+
+v4 completes the stat architecture by combining:
+
+* Base stats
+* Equipment modifiers
+* Status effect modifiers
+
+All resolved dynamically at runtime through property access.
+
+This ensures:
+
+* No stat drift
+* No desynchronization
+* No permanent mutation bugs
+
+---
+
+## Combat Feedback & Logging Improvements
+
+* Introduced consistent combat log formatting
+* Added explicit feedback for:
+  * effect application
+  * effect refresh
+  * damage over time ticks
+  * effect expiration
+* Improved clarity of combat state transitions
+
+---
+
+## Architectural Outcome
+
+v4 transforms combat into a **state-aware system** where entities carry ongoing effects that influence future turns.
+
+The engine now supports:
+
+* Persistent combat states
+* Turn-based effect processing
+* Dynamic stat modification layers
+* Clean separation between logic and presentation
+
+---
+
+## Design Impact
+
+v4 prioritizes **vertical system depth** over feature expansion.
+
+Instead of adding more abilities or content, this version strengthens:
+
+* System consistency
+* Mechanical expressiveness
+* Long-term extensibility
+
+This prepares the engine for future systems such as:
+
+* ability scaling
+* effect synergies
+* enemy abilities
+* progression mechanics
+
+(save compatible with v2 and above)
+---
+
+## v4.5
+
+- (Future/Planned)
+
 ---
 
 ## Current Architectural Philosophy
@@ -358,6 +554,7 @@ This allows future expansion into:
 * Conditional effects
 
 Without refactoring the stat core.
+This system now fully integrates status effects as part of stat computation.
 
 ---
 
@@ -378,7 +575,7 @@ This preserves future flexibility for:
 
 1. Create or load a character.
 2. Explore dungeon floors via randomized events.
-3. Engage in tactical turn-based combat using attacks and abilities.
+3. Engage in tactical turn-based combat using attacks and abilities and status effects.
 4. Generate loot via centralized loot system.
 5. Equip or store items.
 6. Use consumables strategically.
@@ -413,13 +610,16 @@ requirements.txt     # Dependencies
 
 * Turn-based combat
 * Basic attacks and player abilities
-* Ability resource costs and validation
-* Dynamic stat resolution
+* Event-driven ability resolution
+* Persistent status effects (DoT and stat modifiers)
+* Dynamic stat calculation (base + equipment + effects)
+* Effect duration and lifecycle management
+* Centralized damage mitigation
 * XP rewards
 * Boss archetypes
 * Floor-based difficulty scaling
 
-Combat now supports tactical decision-making while preserving deterministic damage resolution.
+Combat now operates as a **state-driven system**, where actions create lasting effects that influence future turns.
 
 ---
 
