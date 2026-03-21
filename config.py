@@ -23,7 +23,7 @@ ENEMY_STATS = {
     'goblin' : {
         'display_name' : None,
         'max_hp' : 80,
-        'attack' : 7,
+        'attack' : 10,
         'defense' : 4,
         'xp_reward' : 10,
         'is_boss' : False
@@ -39,7 +39,7 @@ ENEMY_STATS = {
     'skeleton' : {
         'display_name' : None,
         'max_hp' : 60,
-        'attack' : 25,
+        'attack' : 28,
         'defense' : 15,
         'xp_reward' : 25,
         'is_boss' : False
@@ -72,9 +72,9 @@ ENEMY_STATS = {
 
 
 CLASS_ABILITIES = {
-    'warrior': ('power_strike',),
-    'rogue' : ('quick_strike',),
-    'mage': ('fireball',)
+    'warrior': ('power_strike', 'weakening_strike'),
+    'rogue' : ('quick_strike', 'poison_strike'),
+    'mage': ('fireball', 'heal_self')
 }
 
 

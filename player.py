@@ -31,7 +31,7 @@ class Player(Character):
 
     @property
     def max_hp(self):
-        total = self._base_max_hp
+        total = super().max_hp
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('max_hp', 0)
@@ -43,7 +43,7 @@ class Player(Character):
 
     @property
     def attack(self):
-        total = self._base_attack
+        total = super().attack
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('attack', 0)
@@ -55,7 +55,7 @@ class Player(Character):
 
     @property
     def defense(self):
-        total = self._base_defense
+        total = super().defense
         for item in self.equipment.values():
             if item:
                 total += item.modifiers.get('defense', 0)
@@ -95,7 +95,6 @@ class Player(Character):
                      )
         player.level = data['level']
         player.xp = data['xp']
-        player.current_hp = min(data['current_hp'], player.max_hp)
         player._base_resources = data.get('base_resources', {'mana' : 50})
         player.current_resources = data.get('current_resources', player._base_resources.copy())
         player.inventory = Inventory.from_list(data_list= data.get('inventory', []))
@@ -103,9 +102,16 @@ class Player(Character):
         for slot in player.equipment:
             saved_item = saved_equipment.get(slot)
             player.equipment[slot] = item_from_dict(item= saved_item) if saved_item is not None else None
-        ability_ids = data.get('abilities', CLASS_ABILITIES.get(player.class_type, []))
+
+        saved_hp = data['current_hp']
+        old_max = data['max_hp']
+        player.current_hp = saved_hp
+        player.rescale_current_hp(old_max_hp= old_max)
+        class_abilities = set(CLASS_ABILITIES.get(player.class_type, []))
+        saved_abilities = set(data.get('abilities', []))
+        all_abilities = class_abilities | saved_abilities
         player.abilities = [
-            ability_from_template(template_id= template_id) for template_id in ability_ids
+            ability_from_template(template_id= template_id) for template_id in all_abilities
         ]
         player.current_floor = data['current_floor']
         player.victories_on_floor = data['victories_on_floor']
@@ -146,15 +152,15 @@ class Player(Character):
         if slot not in self.equipment:
             return 'Invalid Equipment slot'
 
+        old_max = self.max_hp
+
         if self.equipment[slot] is not None:
             self.unequip(slot= slot)
 
         self.inventory.remove_item(item= item)
         self.equipment[slot] = item
 
-        if self.current_hp > self.max_hp:
-            self.current_hp = self.max_hp
-    
+        self.rescale_current_hp(old_max_hp= old_max)
 
         return f'{RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX) + item.name} equipped in {slot} slot.'
 
@@ -167,11 +173,12 @@ class Player(Character):
         if item is None:
             return 'Slot already empty.'
 
+        old_max = self.max_hp
+
         self.equipment[slot] = None
         self.inventory.add_item(item= item)
 
-        if self.current_hp > self.max_hp:
-            self.current_hp = self.max_hp
+        self.rescale_current_hp(old_max_hp= old_max)
 
         return f'{RARITY_COLORS.get(item.rarity, Fore.LIGHTWHITE_EX) + item.name} unequipped.'
 
