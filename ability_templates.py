@@ -70,7 +70,7 @@ ABILITY_TEMPLATES = {
 
         'effects': [
             {'type': 'damage', 'stat': 'attack', 'multiplier': 1.2, 'flat_bonus': 6},
-            {'type': 'status_effect', 'effect_class': 'DamageOverTime', 'name': 'Burn', 'duration': 2, 'potency': 10}
+            {'type': 'status_effect', 'effect_class': 'DamageOverTime', 'name': 'Burn', 'duration': 2, 'potency': 10, 'scaling': {'stat': 'attack', 'multiplier': .4}}
         ]
     },
     'heal_self': {
@@ -84,7 +84,7 @@ ABILITY_TEMPLATES = {
         },
 
         'effects': [
-            {'type': 'heal', 'stat': 'attack', 'multiplier': 1.3}
+            {'type': 'heal', 'stat': 'attack', 'multiplier': 1.3, 'flat_bonus': 15}
         ]
     }
 }

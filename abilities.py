@@ -56,16 +56,6 @@ class Ability:
     def _consume_resources(self, caster):
         for resource, cost in self.resource_cost.items():
             caster.spend_resource(resource_type= resource, amount= cost)
-    
-    def _interpret_effect(self, effect, caster, target, result):
-
-        effect_type = effect['type']
-
-        if effect_type == 'damage':
-            stat_value = getattr(caster, effect['stat'])
-            damage = int(stat_value * effect.get('multiplier', 1) + effect.get('flat_bonus', 0))
-
-            result.add_damage(source= caster, target= target, amount= damage)
 
     def _interpret_effect(self, effect, caster, target, result):
 
@@ -91,11 +81,15 @@ class Ability:
             name = effect.get('name', effect_class)
 
             if effect_class == 'DamageOverTime':
+                scaling = effect.get('scaling')
+                stackable = effect.get('stackable')
                 status = DamageOverTime(
                     name= name,
                     duration= duration,
                     potency= potency,
-                    source= caster
+                    source= caster,
+                    stackable= stackable,
+                    scaling= scaling
                 )
 
             elif effect_class == 'StatModifier':

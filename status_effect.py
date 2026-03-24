@@ -40,10 +40,11 @@ class StatusEffect:
 
 
 class DamageOverTime(StatusEffect):
-    def __init__(self, name, duration, potency = 0, source=None):
+    def __init__(self, name, duration, potency = 0, source=None, stackable=False, scaling=None):
         super().__init__(name, duration, potency, source)
 
-        self.stackable = False
+        self.stackable = stackable
+        self.scaling = scaling
 
     def on_apply(self, target, log):
         log.append(f'{target.name} is {self.name} ({self.duration} turns)!')
@@ -52,17 +53,27 @@ class DamageOverTime(StatusEffect):
         if not target.is_alive():
             return
         
+        damage = self.calculate_damage()
         before = target.current_hp
-        target.take_damage(self.potency)
-        damage = before - target.current_hp
+        target.take_damage(damage)
+        damage_done = before - target.current_hp
 
         remaining = self.duration - 1
 
         if remaining > 0:
             turn_text = self.get_turn_text(turns= remaining)
-            log.append(f'{target.name} suffers {damage} damage from {self.name}! ({remaining} {turn_text} left)')
+            log.append(f'{target.name} suffers {damage_done} damage from {self.name}! ({remaining} {turn_text} left)')
         else:
-            log.append(f'{target.name} suffers {damage} damage from {self.name}!')
+            log.append(f'{target.name} suffers {damage_done} damage from {self.name}!')
+
+    def calculate_damage(self):
+        damage = self.potency
+
+        if self.scaling and self.source:
+            stat_value = getattr(self.source, self.scaling['stat'])
+            damage += int(stat_value * self.scaling.get('multiplier', 0) + self.scaling.get('flat_bonus', 0))
+
+        return max(1, damage)
 
 
 

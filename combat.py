@@ -1,4 +1,5 @@
 import time
+from item import Consumable
 from loot import generate_loot
 from colorama import Fore, Style
 
@@ -45,7 +46,7 @@ def apply_ability_result(result, log):
                 log.append(log_status_effect(text= text))
 
 
-menu = {'1' : 'Attack', '2' : 'Ability'}
+menu = {'1': 'Attack', '2': 'Ability', '3': 'Item'}
 def player_turn(player, enemy, log):
 
     while True:
@@ -109,6 +110,42 @@ def player_turn(player, enemy, log):
 
                 apply_ability_result(result= result, log= log)
 
+                return
+
+        elif menu[choice] == 'Item':
+            
+            while True:
+                print('\nConsumables:\n0. Back')
+
+                consumables = [item for item in player.inventory.items if isinstance(item, Consumable)]
+
+                if not consumables:
+                    print('No consumables available.')
+                    break
+
+                for i, item in enumerate(consumables, start=1):
+                    print(f'{i}. {item.name} x{item.quantity}')
+                
+                choice = input('> ').strip()
+
+                if not choice.isdigit():
+                    print('Invalid Choice')
+                    continue
+
+                if choice == '0':
+                    print()
+                    break
+
+                selection = int(choice) -1
+
+                if selection < 0 or selection >= len(consumables):
+                    print('Invalid Choice')
+                    continue
+
+                item = consumables[selection]
+
+                log.append(player.use_item(template_id= item.template_id))
+                
                 return
 
 

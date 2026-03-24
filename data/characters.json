@@ -1,19 +1,19 @@
 {
-  "save_version": "4.0",
+  "save_version": "4.5",
   "characters": {
     "Developer": {
       "class_type": "rogue",
       "level": 1,
-      "xp": 80,
+      "xp": 90,
       "max_hp": 90,
-      "current_hp": 48,
+      "current_hp": 38,
       "attack": 20,
       "defense": 5,
       "base_resources": {
         "mana": 50
       },
       "current_resources": {
-        "mana": 50
+        "mana": 29
       },
       "inventory": [
         {
@@ -35,13 +35,23 @@
           "effect_type": "heal_flat",
           "value": 40,
           "quantity": 1
+        },
+        {
+          "template_id": "mana_potion_minor",
+          "name": "Minor Mana Potion",
+          "slot": null,
+          "rarity": "unknown",
+          "type": "Consumable",
+          "effect_type": "restore_mana",
+          "value": 25,
+          "quantity": 1
         }
       ],
-      "current_floor": 1,
-      "victories_on_floor": 4,
+      "current_floor": 2,
+      "victories_on_floor": 0,
       "abilities": [
-        "poison_strike",
-        "quick_strike"
+        "quick_strike",
+        "poison_strike"
       ],
       "equipment": {
         "weapon": {
